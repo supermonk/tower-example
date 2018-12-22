@@ -1,8 +1,46 @@
 ---
-- name: Hello World!
+
+- name: Hello World - step1
   hosts: all
- 
+  # Run Hello world all nodes
   tasks:
- 
-  - name: Hello World!
+  - name: ECHO
     shell: echo "Hi! Tower is working."
+
+- name: Get hostname of Machines  - step2
+  hosts: all
+  tasks:
+  # command to execute on each node
+  - name: Get HostName of instance
+    shell: hostname -f
+    register: host_name
+    # debug to console
+  - debug: msg="{{ host_name.stdout }}"
+    # debug output to file
+  - local_action: lineinfile create=yes line={{ host_name.stdout }} path=/tmp/ansible_output_{{ ansible_date_time.date }}.log
+
+- name: Upload to s3  - step3
+  hosts: all
+  tasks:
+  # upload to s3
+  - name: Upload
+    # specify the profile, or any command to upload which works on your local
+    shell: aws s3 --profile <profile> cp /tmp/ansible_output_{{ ansible_date_time.date }}.log s3://spre-tt/
+    delegate_to: 127.0.0.1
+
+
+#- name: Clean, Write and push
+#  hosts: all
+#  tasks:
+#  - name: Clean
+#    file:
+#      path: /tmp/ansible_output_{{ ansible_date_time.date }}.log
+#      state: absent
+#      mode: "u+rw,g-wx,o-rwx"
+#    delegate_to: 127.0.0.1
+#  - name: Create log file
+#    file:
+#      path: /tmp/ansible_output_{{ ansible_date_time.date }}.log
+#      state: touch
+#      mode: "u+rw,g-wx,o-rwx"
+#    delegate_to: 127.0.0.1
