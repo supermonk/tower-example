@@ -25,7 +25,7 @@
   # upload to s3
   - name: Upload
     # specify the profile, or any command to upload which works on your local
-    shell: aws s3 --profile <profile> cp /tmp/ansible_output_{{ ansible_date_time.date }}.log s3://spre-tt/
+    shell: aws s3 --profile <profile> cp /tmp/ansible_output_{{ ansible_date_time.date }}.log s3://<bucket>/
     delegate_to: 127.0.0.1
 
 
